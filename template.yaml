@@ -1,29 +1,190 @@
 components:
-  - ref: api-gateway
-    name: API Gateway
-    desc: Main entry point for all API requests
-    typeId: eE1d4atd1Og
+  - ref: azure-front-door
+    name: Azure Front Door
+    desc: Global load balancer with CDN and WAF capabilities
+    typeId: irbUPRZg9mX
     state: ACTIVE
 
-  - ref: auth-service
-    name: Authentication Service
-    desc: Handles user authentication and authorization
-    typeId: 9e5vdfuqxio
+  - ref: app-gateway
+    name: Application Gateway
+    desc: Regional load balancer with SSL termination
+    typeId: 7vVPKVyexRX
+    state: ACTIVE
+
+  - ref: web-app-service
+    name: Azure App Service
+    desc: Managed web application hosting
+    typeId: j8yp0ohPK5w
+    state: ACTIVE
+
+  - ref: api-management
+    name: API Management
+    desc: API gateway with policies, throttling, and monitoring
+    typeId: iKUwq1Y3rDm
+    state: ACTIVE
+
+  - ref: function-app
+    name: Azure Functions
+    desc: Serverless compute for microservices
+    typeId: htoGmg2tYau
+    state: ACTIVE
+
+  - ref: cosmos-db
+    name: Cosmos DB
+    desc: Multi-model NoSQL database with global distribution
+    typeId: eIzLopSjyQP
+    state: ACTIVE
+
+  - ref: sql-database
+    name: Azure SQL Database
+    desc: Managed relational database service
+    typeId: jNDJiVb6ebT
+    state: ACTIVE
+
+  - ref: redis-cache
+    name: Azure Cache for Redis
+    desc: In-memory cache for improved performance
+    typeId: kAtlak9TpbI
+    state: ACTIVE
+
+  - ref: key-vault
+    name: Azure Key Vault
+    desc: Secure storage for secrets, keys, and certificates
+    typeId: isQIKvU88gU
+    state: ACTIVE
+
+  - ref: storage-account
+    name: Azure Storage
+    desc: Blob storage for files, images, and static content
+    typeId: 9NrEY2xBNrN
+    state: ACTIVE
+
+  - ref: service-bus
+    name: Azure Service Bus
+    desc: Message broker for reliable async communication
+    typeId: 5lvl0pyrRzb
+    state: ACTIVE
+
+  - ref: app-insights
+    name: Application Insights
+    desc: Application performance monitoring and analytics
+    typeId: aZ7Ork2CH98
     state: ACTIVE
 
 diagrams:
-  - name: System Architecture
-    desc: Overview of the system architecture
+  - ref: azure-web-app-architecture
+    name: Azure Web Application Architecture
+    desc: Scalable web application architecture on Microsoft Azure
     level: C1
-
     componentInstances:
-      - ref: gateway-1
-        component: api-gateway
+      - ref: front-door-instance
+        component: azure-front-door
 
-      - ref: auth-1
-        component: auth-service
+      - ref: app-gateway-instance
+        component: app-gateway
+
+      - ref: web-app-instance
+        component: web-app-service
+
+      - ref: api-mgmt-instance
+        component: api-management
+
+      - ref: functions-instance
+        component: function-app
+
+      - ref: cosmos-instance
+        component: cosmos-db
+
+      - ref: sql-instance
+        component: sql-database
+
+      - ref: cache-instance
+        component: redis-cache
+
+      - ref: keyvault-instance
+        component: key-vault
+
+      - ref: storage-instance
+        component: storage-account
+
+      - ref: servicebus-instance
+        component: service-bus
+
+      - ref: insights-instance
+        component: app-insights
 
     relations:
-      - fromComponentInstance: gateway-1
-        toComponentInstance: auth-1
-        label: "HTTPS"
+      - fromComponentInstance: front-door-instance
+        toComponentInstance: app-gateway-instance
+        label: "HTTPS Traffic"
+        desc: "Routes global traffic to regional application gateway"
+
+      - fromComponentInstance: app-gateway-instance
+        toComponentInstance: web-app-instance
+        label: "Load Balanced"
+        desc: "Distributes requests to web application instances"
+
+      - fromComponentInstance: app-gateway-instance
+        toComponentInstance: api-mgmt-instance
+        label: "API Requests"
+        desc: "Routes API calls through management layer"
+
+      - fromComponentInstance: api-mgmt-instance
+        toComponentInstance: functions-instance
+        label: "Microservice Calls"
+        desc: "Invokes serverless functions for business logic"
+
+      - fromComponentInstance: web-app-instance
+        toComponentInstance: sql-instance
+        label: "SQL Queries"
+        desc: "Primary relational data storage"
+
+      - fromComponentInstance: functions-instance
+        toComponentInstance: cosmos-instance
+        label: "NoSQL Operations"
+        desc: "Document and graph data operations"
+
+      - fromComponentInstance: web-app-instance
+        toComponentInstance: cache-instance
+        label: "Cache Lookup"
+        desc: "High-performance data caching layer"
+
+      - fromComponentInstance: functions-instance
+        toComponentInstance: cache-instance
+        label: "Cache Updates"
+        desc: "Maintains cache consistency"
+
+      - fromComponentInstance: web-app-instance
+        toComponentInstance: keyvault-instance
+        label: "Secret Retrieval"
+        desc: "Secure access to connection strings and keys"
+
+      - fromComponentInstance: functions-instance
+        toComponentInstance: keyvault-instance
+        label: "Certificate Access"
+        desc: "Retrieves certificates for external integrations"
+
+      - fromComponentInstance: web-app-instance
+        toComponentInstance: storage-instance
+        label: "File Operations"
+        desc: "Stores user uploads and static assets"
+
+      - fromComponentInstance: functions-instance
+        toComponentInstance: servicebus-instance
+        label: "Message Publishing"
+        desc: "Publishes events for async processing"
+
+      - fromComponentInstance: web-app-instance
+        toComponentInstance: servicebus-instance
+        label: "Event Consumption"
+        desc: "Processes background tasks and notifications"
+
+      - fromComponentInstance: web-app-instance
+        toComponentInstance: insights-instance
+        label: "Telemetry"
+        desc: "Application performance and usage monitoring"
+
+      - fromComponentInstance: functions-instance
+        toComponentInstance: insights-instance
+        label: "Function Metrics"
+        desc: "Serverless function execution monitoring"
