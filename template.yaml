@@ -1,0 +1,29 @@
+components:
+  - ref: api-gateway
+    name: API Gateway
+    desc: Main entry point for all API requests
+    typeId: eE1d4atd1Og
+    state: ACTIVE
+
+  - ref: auth-service
+    name: Authentication Service
+    desc: Handles user authentication and authorization
+    typeId: 9e5vdfuqxio
+    state: ACTIVE
+
+diagrams:
+  - name: System Architecture
+    desc: Overview of the system architecture
+    level: C1
+
+    componentInstances:
+      - ref: gateway-1
+        component: api-gateway
+
+      - ref: auth-1
+        component: auth-service
+
+    relations:
+      - fromComponentInstance: gateway-1
+        toComponentInstance: auth-1
+        label: "HTTPS"
